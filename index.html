@@ -147,6 +147,7 @@ main{max-width:1300px;margin:auto;padding:18px 28px 60px}
       <div class="backbar">
         <button class="secondary" id="backBtn">← Chapitres</button>
         <h2 id="chapTitle"></h2>
+        <button class="secondary admin-only" id="deleteChapterBtn" type="button">Supprimer le chapitre</button>
         <select id="mode" style="padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink)">
           <option value="mixed">Mixte</option>
           <option value="en-fr">Anglais → Français</option>
@@ -293,11 +294,27 @@ $('#backBtn').onclick=()=>{
   $('#chapPage').hidden=true;
   $('#chapList').hidden=false;
 };
-
+$('#deleteChapterBtn').onclick=async()=>{
+  const chap=openChap;
+  if(!isAdmin()||!chap||chap===ALL)return;
+  if(!confirm(`Supprimer le chapitre « ${chap} » et tous ses mots ?`))return;
+  try{
+    await api('/chapters/'+encodeURIComponent(chap),{method:'DELETE'});
+    openChap=null;
+    $('#chapPage').hidden=true;
+    $('#chapList').hidden=false;
+    await load();
+    toast('Chapitre supprimé');
+  }catch(err){
+    toast(err.message);
+  }
+};
+  
 function renderChapterPage(){
   const list=wordsOf(openChap);
   $('#chapTitle').textContent=openChap===ALL?'Tous les chapitres':openChap;
   $('#count').textContent=list.length+' mot'+(list.length>1?'s':'');
+  $('#deleteChapterBtn').style.display=isAdmin()&&openChap!==ALL?'inline-flex':'none';
   $('#wordlist').innerHTML=list.length?list.map(w=>`<article class="worditem"><div class="wline"><div><div class="en">${esc(w.english)}</div><div class="fr">→ ${esc(w.translation)}</div></div><button class="speak" data-speak="${esc(w.id)}">🔊</button></div><div class="meta">${w.synonym?'synonyme · '+esc(w.synonym)+' · ':''}${w.antonym?'contraire · '+esc(w.antonym):''}${openChap===ALL?'<br>📁 '+esc(chapOf(w)):''}${isAdmin()?`<br><button class="admin-inline secondary" data-delete="${esc(w.id)}" style="margin-top:8px;padding:5px 8px">Supprimer</button>`:''}</div></article>`).join(''):'<div class="empty">Ce chapitre est vide.</div>';
   $$('[data-speak]').forEach(b=>b.onclick=()=>speak(words.find(w=>String(w.id)===b.dataset.speak).english,'en-US'));
   $$('[data-delete]').forEach(b=>b.onclick=async()=>{
