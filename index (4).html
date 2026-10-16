@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roue des mots — anglais / français</title>
+<style>
+:root{--bg:#f4f1ea;--panel:#fffdf8;--ink:#1f2522;--muted:#68716b;--line:#dcd8ce;--accent:#e7833f;--accent2:#1d6b5d;--soft:#eef4f0;--shadow:0 18px 50px #28372c18}
+body.dark{--bg:#151917;--panel:#202522;--ink:#f2f0e9;--muted:#a8b0a9;--line:#3a443e;--soft:#29352f;--shadow:0 18px 50px #0008}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 50% 0,#fff8e9aa,transparent 38%),var(--bg);color:var(--ink);font:15px ui-sans-serif,system-ui,sans-serif;min-height:100vh}
+body.dark{background:radial-gradient(circle at 50% 0,#28392faa,transparent 38%),var(--bg)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0}
+header{display:flex;align-items:center;justify-content:space-between;max-width:1300px;margin:auto;padding:28px 28px 10px}
+.brand{display:flex;align-items:center;gap:13px}
+.mark{width:39px;height:39px;border-radius:13px 13px 13px 3px;background:var(--accent);display:grid;place-items:center;color:#fff;font-weight:800;transform:rotate(-8deg)}
+h1{font:700 clamp(22px,3vw,34px)/1 Georgia,serif;margin:0}
+.sub{font-size:12px;color:var(--muted);margin-top:5px}
+.iconbtn,.tab{background:transparent;color:var(--muted);padding:9px 12px;border-radius:11px}
+.iconbtn:hover,.tab:hover{background:var(--soft);color:var(--ink)}
+main{max-width:1300px;margin:auto;padding:18px 28px 60px}
+.tabs{display:flex;gap:7px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow:auto}
+.tab.active{color:var(--ink);background:var(--soft);font-weight:700}
+.view{display:none}.view.active{display:block}
+.layout{display:grid;grid-template-columns:280px minmax(340px,1fr) 330px;gap:20px}
+.card{background:color-mix(in srgb,var(--panel) 93%,transparent);border:1px solid var(--line);border-radius:23px;box-shadow:var(--shadow)}
+.side,.list{padding:21px}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent2);font-weight:800;margin:0 0 13px}
+.field{margin:13px 0}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:var(--bg);color:var(--ink);outline:none}
+.field textarea{min-height:78px;resize:vertical}
+.primary{background:var(--accent);color:white;padding:12px 17px;border-radius:12px;font-weight:800;width:100%}
+.secondary{background:var(--soft);color:var(--ink);padding:10px 13px;border-radius:11px}
+.small{font-size:12px;color:var(--muted);line-height:1.45}
+.wheelstage{min-height:590px;display:grid;place-items:center;position:relative;overflow:hidden}
+.wheelwrap{display:grid;place-items:center;position:relative}
+.wheel{width:min(37vw,370px);height:min(37vw,370px);min-width:265px;min-height:265px;border-radius:50%;border:12px solid var(--panel);box-shadow:0 23px 45px #26392b2b,0 0 0 1px var(--line);background:conic-gradient(#e7833f,#f2b35c,#5f9f87,#d8dfcd,#e7833f);transition:transform 3.6s cubic-bezier(.12,.72,.14,1);position:relative}
+.wheel:before{content:'';position:absolute;inset:16%;border:1px dashed #ffffffaa;border-radius:50%}
+.pointer{position:absolute;top:-12px;width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:25px solid var(--ink);z-index:2}
+.spin{position:absolute;border-radius:50%;width:108px;height:108px;background:var(--ink);color:var(--bg);font-weight:900;letter-spacing:.12em;box-shadow:0 10px 25px #0004}
+.spin:disabled{opacity:.6}
+.question{margin:0 20px 20px;padding:18px;border-radius:16px;background:var(--soft);border:1px solid var(--line)}
+.question[hidden]{display:none}
+.qtop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.qword{font:700 25px Georgia,serif}
+.answer{display:flex;gap:8px;margin-top:13px}
+.answer input{flex:1;min-width:0;padding:11px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.answer button{padding:0 16px;border-radius:10px;background:var(--accent2);color:#fff;font-weight:700}
+.result{margin:12px 0 0;font-weight:700}
+.good{color:#24805c}.bad{color:#bd4c42}
+.listhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+.listhead h2{font:700 21px Georgia,serif;margin:0}
+.wordlist{display:grid;gap:10px;max-height:590px;overflow:auto}
+.worditem{padding:14px;border:1px solid var(--line);border-radius:15px;background:var(--bg);position:relative}
+.wline{display:flex;justify-content:space-between;gap:8px}
+.en{font:700 19px Georgia,serif}
+.fr{color:var(--accent2);margin-top:3px}
+.meta{font-size:11px;color:var(--muted);margin-top:9px;line-height:1.5}
+.speak{background:transparent;color:var(--accent);font-size:18px;padding:2px 5px}
+.admin-only{display:none}
+.is-admin .admin-only{display:block}
+.is-admin .admin-inline{display:inline-flex}
+.admin-inline{display:none}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.empty{padding:35px 10px;color:var(--muted);text-align:center}
+.subview{max-width:860px;margin:auto}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.eval{padding:16px;border:1px solid var(--line);border-radius:14px;margin:9px 0;background:var(--panel)}
+.eval h3{margin:0 0 5px;font:700 18px Georgia,serif}
+.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.statcard{padding:20px}
+.statcard h2{margin:0 0 15px;font:700 21px Georgia,serif}
+.bar{display:grid;grid-template-columns:110px 1fr 42px;gap:8px;align-items:center;margin:12px 0;font-size:12px}
+.barline{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.barline i{display:block;height:100%;background:var(--accent);border-radius:inherit}
+.modal{position:fixed;inset:0;background:#0007;display:grid;place-items:center;padding:20px;z-index:10}
+.modal[hidden]{display:none}
+.modal .card{width:min(410px,100%);padding:24px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:99px;display:none;z-index:20}
+.toast.show{display:block}
+.chgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.chcard{padding:20px;text-align:left;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);position:relative}.chcard .chwords{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:4px}.chcard .chwords li{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chwheel{width:74px;height:74px;border-radius:50%;float:right;margin:0 0 8px 12px;border:6px solid var(--panel);box-shadow:0 5px 12px #26392b2b;background:conic-gradient(#e7833f,#f2b35c,#5f9f87,#d8dfcd,#e7833f);transition:transform .7s cubic-bezier(.12,.72,.14,1)}.chspin{padding:7px 10px;font-size:12px;border-radius:9px;background:var(--ink);color:var(--bg);font-weight:800}.newchapter{margin-left:8px}
+.chcard:hover{border-color:var(--accent)}
+.chcard h3{margin:0 0 6px;font:700 19px Georgia,serif}
+.backbtn{background:var(--soft);color:var(--ink);padding:9px 14px;border-radius:11px;margin-bottom:14px}
+.chapterbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.chapterbar h2{font:700 24px Georgia,serif;margin:0}
+.chgroup{margin-top:4px}
+@media(max-width:1050px){.layout{grid-template-columns:230px minmax(300px,1fr)}.list{grid-column:1/-1}.wordlist{grid-template-columns:repeat(2,1fr);max-height:none}}
+@media(max-width:700px){header,main{padding-left:16px;padding-right:16px}.layout{display:block}.side,.wheelstage,.list{margin-bottom:15px}.wheelstage{min-height:480px}.wheel{width:290px;height:290px}.formgrid,.statgrid{grid-template-columns:1fr}.wordlist{grid-template-columns:1fr}.answer{display:block}.answer button{padding:11px;width:100%;margin-top:8px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="mark">↗</div>
+    <div><h1>Roue des mots</h1><div class="sub">anglais · français · mémorisation active</div></div>
+  </div>
+  <div class="toolbar">
+    <button class="iconbtn" id="themeBtn" title="Changer de thème">☼ / ☾</button>
+    <button class="iconbtn" id="adminBtn">Admin</button>
+  </div>
+</header>
+
+<main>
+  <nav class="tabs">
+    <button class="tab active" data-view="chapitres">Chapitres</button>
+    <button class="tab" data-view="entrainement">Roue</button>
+    <button class="tab" data-view="evaluations">Éval</button>
+    <button class="tab" data-view="stats">Stats</button>
+  </nav>
+
+  <!-- CHAPITRES -->
+  <section class="view active" id="chapitres">
+    <div id="chapterSelect">
+      <div class="chapterbar"><p class="eyebrow" style="margin:0">Choisis un chapitre</p><button class="secondary newchapter" id="newChapterBtn">+ Nouveau chapitre</button></div>
+      <div class="chgrid" id="chapterGrid"></div>
+    </div>
+  </section>
+
+  <!-- ROUE -->
+  <section class="view" id="entrainement">
+    <div class="layout">
+      <aside class="card side">
+        <p class="eyebrow">Réglages</p>
+        <div class="field">
+          <label>Mode de question</label>
+          <select id="mode">
+            <option value="mixed">Mixte</option>
+            <option value="en-fr">Anglais → Français</option>
+            <option value="fr-en">Français → Anglais</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Chapitre</label>
+          <select id="chapterFilter"></select>
+        </div>
+        <p class="small">Appuie sur <b>SPIN</b> pour tirer un mot.</p>
+
+        <div class="admin-only" id="adminPanel">
+          <hr>
+          <p class="eyebrow">Gestion admin</p>
+          <form id="wordForm">
+            <div class="field"><label>Chapitre *</label><input name="chapter" id="chInput" list="chList" required placeholder="Unit 1"></div>
+            <datalist id="chList"></datalist>
+            <div class="field"><label>Anglais *</label><input name="english" required></div>
+            <div class="field"><label>Français *</label><input name="translation" required></div>
+            <div class="field"><label>Synonyme (optionnel)</label><input name="synonym"></div>
+            <div class="field"><label>Contraire (optionnel)</label><input name="antonym"></div>
+            <button class="primary">Ajouter le mot</button>
+          </form>
+        </div>
+      </aside>
+
+      <section>
+        <div class="card wheelstage">
+          <div class="wheelwrap">
+            <div class="pointer"></div>
+            <div class="wheel" id="wheel" tabindex="0" role="button" aria-label="Faire tourner la roue"></div>
+            <button class="spin" id="spin">SPIN</button>
+          </div>
+        </div>
+        <div class="question" id="question" hidden>
+          <div class="qtop">
+            <div>
+              <div class="eyebrow">À toi</div>
+              <div class="qword" id="qword"></div>
+            </div>
+            <button class="speak" id="qSpeak" title="Écouter">🔊</button>
+          </div>
+          <div class="small" id="qhint"></div>
+          <form class="answer" id="answerForm">
+            <input id="answer" autocomplete="off" placeholder="Ta réponse…" required>
+            <button>Corriger</button>
+          </form>
+          <div class="result" id="result"></div>
+        </div>
+      </section>
+
+      <section class="card list">
+        <div class="listhead">
+          <h2>Liste des mots</h2>
+          <span class="small" id="count">0 mot</span>
+        </div>
+        <div class="wordlist" id="wordlist"></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ÉVALUATIONS -->
+  <section class="view subview" id="evaluations">
+    <div class="card" style="padding:22px">
+      <div class="listhead">
+        <div>
+          <p class="eyebrow">Repères partagés</p>
+          <h2 style="font:700 28px Georgia,serif;margin:0">Évaluations passées</h2>
+        </div>
+        <span class="small">Ajout admin</span>
+      </div>
+      <div class="admin-only">
+        <form id="evalForm" class="formgrid">
+          <div class="field"><label>Nom de l’évaluation *</label><input name="name" required placeholder="Contrôle chapitre 2"></div>
+          <div class="field"><label>Date *</label><input name="date" type="date" required></div>
+          <div class="field" style="grid-column:1/-1"><label>Mots présents (séparés par des virgules)</label><textarea name="words" required placeholder="achieve, reliable, ..."></textarea></div>
+          <button class="primary" style="grid-column:1/-1">Publier l’évaluation</button>
+        </form>
+      </div>
+      <div id="evalList" style="margin-top:20px"></div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="view subview" id="stats">
+    <div class="statgrid">
+      <div class="card statcard"><p class="eyebrow">Progression personnelle</p><h2>Les plus ratés</h2><div id="badStats"></div></div>
+      <div class="card statcard"><p class="eyebrow">Progression personnelle</p><h2>Les plus réussis</h2><div id="goodStats"></div></div>
+    </div>
+    <p class="small" style="margin:16px">Ces statistiques sont individuelles : elles restent dans le stockage de ce navigateur et ne sont jamais envoyées au serveur.</p>
+  </section>
+</main>
+
+<!-- MODAL LOGIN -->
+<div class="modal" id="modal" hidden>
+  <div class="card">
+    <div class="listhead"><h2>Connexion admin</h2><button class="iconbtn" id="closeModal">×</button></div>
+    <p class="small">Le mot de passe est configuré par l’administrateur du serveur.</p>
+    <form id="loginForm">
+      <div class="field"><label>Mot de passe</label><input type="password" name="password" required autofocus></div>
+      <button class="primary">Se connecter</button>
+      <p class="result" id="loginMsg"></p>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({
+  '&': '&', '<': '<', '>': '>', '"': '"', "'": '''
+}[c]));
+(() => {
+  const $ = s => document.querySelector(s);
+  const $$ = s => [...document.querySelectorAll(s)];
+  const API = '/api';
+  const tokenKey = 'roue-admin-token';
+  const localKey = 'roue-stats-v1';
+  const chaptersKey = 'roue-chapitres-v1';
+  const wordChaptersKey = 'roue-mots-chapitres-v1';
+
+  let words = [];
+  let evals = [];
+  let current = null;
+  let spinning = false;
+  let rotation = 0;
+  let selectedChapter = 'Tous';
+  let stats = JSON.parse(localStorage.getItem(localKey) || '{}');
+  let savedChapters = JSON.parse(localStorage.getItem(chaptersKey) || '[]');
+  let wordChapterMap = JSON.parse(localStorage.getItem(wordChaptersKey) || '{}');
+
+  const norm = s => String(s || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s'-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/^(to|the|a|an|le|la|les|l'|un|une|des)\s+/, '');
+
+  const lev = (a, b) => {
+    const m = a.length, n = b.length;
+    const d = Array.from({ length: m + 1 }, (_, i) => [i]);
+    for (let j = 1; j <= n; j++) d[0][j] = j;
+    for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++) {
+      d[i][j] = Math.min(d[i-1][j] + 1, d[i][j-1] + 1, d[i-1][j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+      if (i > 1 && j > 1 && a[i-1] === b[j-2] && a[i-2] === b[j-1]) d[i][j] = Math.min(d[i][j], d[i-2][j-2] + 1);
+    }
+    return d[m][n];
+  };
+
+  const isMatch = (inp, acc) => acc.some(a => a && (inp === a || (a.length > 3 && lev(inp, a) <= (a.length > 7 ? 2 : 1))));
+
+  function toast(t) {
+    const el = $('#toast');
+    el.textContent = t;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2400);
+  }
+
+  function speak(text, lang) {
+    if (!('speechSynthesis' in window)) return toast('Audio non disponible dans ce navigateur');
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang || (/[àâçéèêëîïôùûüÿœ]/i.test(text) ? 'fr-FR' : 'en-US');
+    speechSynthesis.speak(u);
+  }
+
+  // ---------- ADMIN : persistance de session ----------
+  function isAdmin() { return !!localStorage.getItem(tokenKey); }
+
+  function applyAdminUI() {
+    document.body.classList.toggle('is-admin', isAdmin());
+  }
+
+  function logoutAdmin(silent = false) {
+    localStorage.removeItem(tokenKey);
+    applyAdminUI();
+    if (!silent) toast('Session admin expirée, reconnecte-toi');
+  }
+
+  async function api(url, opt = {}) {
+    const h = { 'Content-Type': 'application/json' };
+    if (isAdmin()) h.Authorization = 'Bearer ' + localStorage.getItem(tokenKey);
+    const r = await fetch(API + url, { ...opt, headers: h });
+    if (r.status === 401 || r.status === 403) {
+      logoutAdmin();
+      throw Error('Session expirée');
+    }
+    if (!r.ok) throw Error((await r.json().catch(() => ({}))).error || 'Erreur');
+    return r.json();
+  }
+
+  async function load() {
+    applyAdminUI();
+    try { words = await api('/words'); } catch (e) { words = []; console.error(e); }
+    words = words.map(w => ({
+      ...w,
+      chapter: w.chapter || wordChapterMap[w.id] || wordChapterMap[`${w.english}\u0000${w.translation}`] || ''
+    }));
+    const discovered = words.map(w => w.chapter).filter(Boolean);
+    savedChapters = [...new Set([...savedChapters, ...discovered])].sort((a, b) => a.localeCompare(b, 'fr'));
+    localStorage.setItem(chaptersKey, JSON.stringify(savedChapters));
+    try { evals = await api('/evaluations'); } catch { evals = []; }
+    renderAll();
+  }
+
+  // ---------- CHAPITRES ----------
+  function chapterList() {
+    const set = new Set([...savedChapters, ...words.map(w => w.chapter).filter(Boolean)]);
+    return [...set].sort((a, b) => a.localeCompare(b, 'fr'));
+  }
+
+  function chapterWords(c) {
+    return words.filter(w => (w.chapter || 'Sans chapitre') === c);
+  }
+
+  function filteredWords() {
+    const c = $('#chapterFilter').value || 'Tous';
+    return c === 'Tous' ? words : chapterWords(c);
+  }
+
+  function renderChapterFilter() {
+    const sel = $('#chapterFilter');
+    const prev = sel.value || selectedChapter;
+    const chs = chapterList();
+    sel.innerHTML = ['<option value="Tous">Tous les chapitres</option>']
+      .concat(chs.map(c => `<option value="${esc(c)}">${esc(c)}</option>`)).join('');
+    sel.value = chs.includes(prev) || prev === 'Tous' ? prev : 'Tous';
+    $('#chList').innerHTML = chs.map(c => `<option value="${esc(c)}"></option>`).join('');
+  }
+
+  function renderChapters() {
+    const grid = $('#chapterGrid');
+    const chs = chapterList();
+    const cards = [`
+      <button class="chcard" data-ch="Tous">
+        <h3>Tous les chapitres</h3>
+        <div class="small">${words.length} mot(s)</div>
+        <div class="small" style="margin-top:12px">Voir la roue générale →</div>
+      </button>`];
+
+    chs.forEach(c => {
+      const list = chapterWords(c);
+      const preview = list.slice(0, 4).map(w =>
+        `<li>${esc(w.english)} <span>→ ${esc(w.translation)}</span></li>`).join('');
+      cards.push(`
+        <article class="chcard">
+          ${isAdmin() ? `<button class="admin-inline secondary" data-delchap="${esc(c)}" style="float:right;padding:5px 8px" title="Supprimer le chapitre">🗑️</button>` : ''}
+          <div class="chwheel" data-chwheel="${esc(c)}"></div>
+          <h3>${esc(c)}</h3>
+          <div class="small">${list.length} mot(s)</div>
+          ${list.length
+            ? `<ul class="chwords">${preview}</ul>
+               <button class="chspin" data-spin-ch="${esc(c)}">Tourner la roue</button>
+               <div class="small" data-result-ch="${esc(c)}" style="margin-top:8px"></div>`
+            : '<div class="empty" style="padding:14px 0">Chapitre vide</div>'}
+        </article>`);
+    });
+
+    grid.innerHTML = cards.join('');
+
+    grid.querySelectorAll('[data-ch]').forEach(b => {
+      b.onclick = () => {
+        selectedChapter = b.dataset.ch;
+        $('#chapterFilter').value = selectedChapter;
+        goTo('entrainement');
+        renderWords();
+        updateWheel();
+      };
+    });
+
+    grid.querySelectorAll('[data-spin-ch]').forEach(b => b.onclick = e => {
+      e.stopPropagation();
+      const c = b.dataset.spinCh;
+      const list = chapterWords(c);
+      if (!list.length) return;
+      const i = Math.floor(Math.random() * list.length);
+      const wheel = grid.querySelector(`[data-chwheel="${CSS.escape(c)}"]`);
+      if (wheel) wheel.style.transform = `rotate(${720 + Math.random() * 360}deg)`;
+      const out = grid.querySelector(`[data-result-ch="${CSS.escape(c)}"]`);
+      if (out) out.textContent = `→ ${list[i].english} · ${list[i].translation}`;
+    });
+
+    grid.querySelectorAll('[data-delchap]').forEach(b => b.onclick = e => {
+      e.stopPropagation();
+      deleteChapter(b.dataset.delchap);
+    });
+  }
+
+  async function deleteChapter(name) {
+    const list = chapterWords(name);
+    if (!confirm(`Supprimer le chapitre "${name}" et ses ${list.length} mot(s) ?`)) return;
+    try {
+      for (const w of list) await api('/words/' + w.id, { method: 'DELETE' });
+      savedChapters = savedChapters.filter(c => c !== name);
+      localStorage.setItem(chaptersKey, JSON.stringify(savedChapters));
+      if (selectedChapter === name) selectedChapter = 'Tous';
+      await load();
+      toast('Chapitre supprimé');
+    } catch (e) { toast(e.message); }
+  }
+
+  // ---------- LISTE / ROUE ----------
+  function renderWords() {
+    const list = filteredWords();
+    $('#count').textContent = list.length + ' ' + (list.length < 2 ? 'mot' : 'mots');
+    $('#wordlist').innerHTML = list.length
+      ? list.map((w, i) => `
+        <article class="worditem">
+          <div class="wline">
+            <div>
+              <div class="en">${esc(w.english)}</div>
+              <div class="fr">→ ${esc(w.translation)}</div>
+            </div>
+            <button class="speak" data-speak="${i}" title="Écouter">🔊</button>
+          </div>
+          <div class="meta">
+            ${w.chapter ? esc(w.chapter) + ' · ' : ''}
+            ${w.synonym ? 'synonyme · ' + esc(w.synonym) + ' · ' : ''}
+            ${w.antonym ? 'contraire · ' + esc(w.antonym) : ''}
+            ${isAdmin() ? `<br><button class="admin-inline secondary" data-delete="${w.id}" style="margin-top:8px;padding:5px 8px">Supprimer</button>` : ''}
+          </div>
+        </article>`).join('')
+      : '<div class="empty">Aucun mot dans ce chapitre.</div>';
+
+    $$('[data-speak]').forEach(b => b.onclick = () => speak(list[+b.dataset.speak].english, 'en-US'));
+    $$('[data-delete]').forEach(b => b.onclick = async () => {
+      if (!confirm('Supprimer ce mot ?')) return;
+      try { await api('/words/' + b.dataset.delete, { method: 'DELETE' }); await load(); }
+      catch (e) { toast(e.message); }
+    });
+  }
+
+  function updateWheel() {
+    const list = filteredWords();
+    const w = $('#wheel');
+    const n = Math.max(list.length, 1);
+    const colors = ['#e7833f', '#f2b35c', '#5f9f87', '#d8dfcd', '#cb705e'];
+    w.style.background = `conic-gradient(${Array.from({ length: n }, (_, i) =>
+      `${colors[i % colors.length]} ${i * 360 / n}deg ${(i + 1) * 360 / n}deg`).join(',')})`;
+  }
+
+  function showQuestion(w) {
+    const modeSel = $('#mode').value;
+    const mode = modeSel === 'mixed' ? (Math.random() < .5 ? 'en-fr' : 'fr-en') : modeSel;
+    let prompt;
+
+    if (mode === 'fr-en') {
+      prompt = 'Quel est le mot anglais correspondant ?';
+      current = { w, accepted: [norm(w.english)] };
+      $('#qword').textContent = w.translation;
+      $('#qSpeak').onclick = () => speak(w.translation, 'fr-FR');
+    } else {
+      const opts = ['translation'];
+      if (w.synonym) opts.push('synonym');
+      if (w.antonym) opts.push('antonym');
+      const key = opts[Math.floor(Math.random() * opts.length)];
+      prompt = key === 'translation' ? 'Donne la traduction française.'
+             : key === 'synonym' ? 'Donne un synonyme.' : 'Donne le contraire.';
+      current = { w, accepted: String(w[key]).split(/[;,|/]/).map(norm) };
+      $('#qword').textContent = w.english;
+      $('#qSpeak').onclick = () => speak(w.english, 'en-US');
+    }
+
+    $('#qhint').textContent = prompt;
+    $('#question').hidden = false;
+    $('#result').textContent = '';
+    $('#result').className = 'result';
+    $('#answer').value = '';
+    $('#answer').focus();
+  }
+
+  function spin() {
+    const list = filteredWords();
+    if (spinning) return;
+    if (!list.length) return toast('Aucun mot dans ce chapitre');
+    spinning = true;
+    $('#question').hidden = true;
+    $('#spin').disabled = true;
+    const i = Math.floor(Math.random() * list.length);
+    rotation += 1440 + Math.random() * 360 + (360 - i * 360 / list.length);
+    $('#wheel').style.transform = `rotate(${rotation}deg)`;
+    setTimeout(() => {
+      spinning = false;
+      $('#spin').disabled = false;
+      showQuestion(list[i]);
+    }, 3650);
+  }
+
+  function goTo(view) {
+    $$('.tab').forEach(x => x.classList.toggle('active', x.dataset.view === view));
+    $$('.view').forEach(v => v.classList.toggle('active', v.id === view));
+  }
+
+  function renderEvals() {
+    $('#evalList').innerHTML = evals.length
+      ? evals.slice().reverse().map(x => `
+        <article class="eval">
+          <h3>${esc(x.name)}</h3>
+          <div class="small">${esc(x.date)} · ${x.words.length} mot(s)</div>
+          <div class="meta">${x.words.map(esc).join(' · ')}</div>
+        </article>`).join('')
+      : '<div class="empty">Aucune évaluation enregistrée.</div>';
+  }
+
+  function renderStats() {
+    const rows = words.map(w => {
+      const s = stats[w.id] || { right: 0, total: 0 };
+      return { w, total: s.total, rate: s.total ? s.right / s.total : null };
+    }).filter(r => r.total > 0);
+
+    const bad = rows.slice().sort((a, b) => a.rate - b.rate).slice(0, 8);
+    const good = rows.slice().sort((a, b) => b.rate - a.rate).slice(0, 8);
+
+    const bar = r => `
+      <div class="bar">
+        <span>${esc(r.w.english)}</span>
+        <div class="barline"><i style="width:${Math.round(r.rate * 100)}%"></i></div>
+        <span>${Math.round(r.rate * 100)}%</span>
+      </div>`;
+
+    $('#badStats').innerHTML = bad.length ? bad.map(bar).join('') : '<div class="empty">Pas encore de données.</div>';
+    $('#goodStats').innerHTML = good.length ? good.map(bar).join('') : '<div class="empty">Pas encore de données.</div>';
+  }
+
+  function renderAll() {
+    applyAdminUI();
+    renderChapterFilter();
+    renderChapters();
+    renderWords();
+    updateWheel();
+    renderEvals();
+    renderStats();
+  }
+
+  // ---------- ÉVÉNEMENTS ----------
+  $('#spin').onclick = spin;
+  $('#wheel').onclick = spin;
+  $('#wheel').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); spin(); } };
+
+  $('#chapterFilter').onchange = () => {
+    selectedChapter = $('#chapterFilter').value;
+    renderWords();
+    updateWheel();
+  };
+
+  $('#mode').onchange = () => {};
+
+  $('#answerForm').onsubmit = e => {
+    e.preventDefault();
+    if (!current) return;
+    const ok = isMatch(norm($('#answer').value), current.accepted);
+    const id = current.w.id;
+    stats[id] = stats[id] || { right: 0, total: 0 };
+    stats[id].total++;
+    if (ok) stats[id].right++;
+    localStorage.setItem(localKey, JSON.stringify(stats));
+    $('#result').textContent = ok ? 'Bravo, bonne réponse !' : 'Pas tout à fait. Réponse : ' + current.accepted.join(' / ');
+    $('#result').className = 'result ' + (ok ? 'good' : 'bad');
+    renderStats();
+  };
+
+  $$('.tab').forEach(t => t.onclick = () => goTo(t.dataset.view));
+
+  $('#themeBtn').onclick = () => {
+    document.body.classList.toggle('dark');
+    localStorage.setItem('roue-theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+  };
+  if (localStorage.getItem('roue-theme') === 'dark') document.body.classList.add('dark');
+
+  $('#adminBtn').onclick = () => {
+    if (!isAdmin()) { $('#modal').hidden = false; return; }
+    toast('Déjà en mode admin');
+  };
+  $('#closeModal').onclick = () => $('#modal').hidden = true;
+
+  $('#loginForm').onsubmit = async e => {
+    e.preventDefault();
+    const password = new FormData(e.target).get('password');
+    try {
+      const r = await fetch(API + '/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      if (!r.ok) throw Error('Mot de passe incorrect');
+      const { token } = await r.json();
+      localStorage.setItem(tokenKey, token);
+      $('#modal').hidden = true;
+      e.target.reset();
+      $('#loginMsg').textContent = '';
+      applyAdminUI();
+      renderAll();
+      toast('Connecté en admin');
+    } catch (err) {
+      $('#loginMsg').textContent = err.message;
+      $('#loginMsg').className = 'result bad';
+    }
+  };
+
+  $('#newChapterBtn').onclick = () => {
+    const name = prompt('Nom du nouveau chapitre :');
+    if (!name || !name.trim()) return;
+    savedChapters = [...new Set([...savedChapters, name.trim()])].sort((a, b) => a.localeCompare(b, 'fr'));
+    localStorage.setItem(chaptersKey, JSON.stringify(savedChapters));
+    renderAll();
+    toast('Chapitre créé');
+  };
+
+  $('#wordForm').onsubmit = async e => {
+    e.preventDefault();
+    try {
+      const b = Object.fromEntries(new FormData(e.target));
+      const ch = b.chapter;
+      const created = await api('/words', { method: 'POST', body: JSON.stringify(b) });
+      if (b.chapter && created && created.id) {
+        try {
+          await api('/words/' + created.id, { method: 'PUT', body: JSON.stringify({ chapter: b.chapter.trim() }) });
+        } catch (err) { console.warn('Chapitre non persisté côté serveur', err); }
+      }
+      if (b.chapter) {
+        savedChapters = [...new Set([...savedChapters, b.chapter.trim()])].sort((a, z) => a.localeCompare(z, 'fr'));
+        localStorage.setItem(chaptersKey, JSON.stringify(savedChapters));
+        if (created && created.id && !created.chapter) wordChapterMap[created.id] = b.chapter.trim();
+        wordChapterMap[`${b.english.trim()}\u0000${b.translation.trim()}`] = b.chapter.trim();
+        localStorage.setItem(wordChaptersKey, JSON.stringify(wordChapterMap));
+      }
+      e.target.reset();
+      $('#chInput').value = ch;
+      await load();
+      toast('Mot ajouté');
+    } catch (err) { toast(err.message); }
+  };
+
+  $('#evalForm').onsubmit = async e => {
+    e.preventDefault();
+    try {
+      const b = Object.fromEntries(new FormData(e.target));
+      await api('/evaluations', { method: 'POST', body: JSON.stringify(b) });
+      e.target.reset();
+      await load();
+      toast('Évaluation publiée');
+    } catch (err) { toast(err.message); }
+  };
+
+  // ---------- DÉMARRAGE ----------
+  applyAdminUI();
+  load();
+})();
+</script>
+</body>
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4bc70e2c01a94c73b74392e4234840661791215815920" integrity="sha512-L0ha0OXavK/8okipN9F8BtP84dg9DUhPERbBXzwI6dgTA55d2+yweo3pn5CSFYs45/r8md2+xvUPtTdvTNRfjA==" data-cf-beacon='{"version":"2024.11.0","token":"8607d2a720d14b038279025b2b5a82e5","spa":2}' crossorigin="anonymous"></script>
+</html>
