@@ -107,7 +107,15 @@ const server = http.createServer(async (req, res) => {
       );
       return send(res, 201, w);
     }
-
+    // Supprimer un chapitre (admin) : /api/chapters/NomDuChapitre
+    if (p.startsWith('/api/chapters/') && req.method === 'DELETE') {
+      if (!isAdmin(req)) return send(res, 403, { error: 'Accès admin requis.' });
+      const name = decodeURIComponent(p.split('/')[3] || '');
+      if (!name) return send(res, 400, { error: 'Chapitre manquant' });
+      const r = await pool.query('DELETE FROM words WHERE chapter=$1', [name]);
+      if (!r.rowCount) return send(res, 404, { error: 'Chapitre introuvable' });
+      return send(res, 200, { ok: true, deleted: r.rowCount });
+    }
     // Modifier / supprimer un mot
     if (p.startsWith('/api/words/') && ['PUT', 'DELETE'].includes(req.method)) {
       if (!isAdmin(req)) return send(res, 403, { error: 'Accès admin requis.' });
