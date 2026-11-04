@@ -249,19 +249,22 @@ let words=[],evals=[],current=null,spinning=false,rotation=0,openChap=null;
 const localKey='roue-stats-v1',tokenKey='roue-admin-token';
 let stats=JSON.parse(localStorage.getItem(localKey)||'{}');
 
+// purge l'ancien token admin qui était en localStorage (l'admin est maintenant en sessionStorage)
+localStorage.removeItem(tokenKey);
+
 const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9\s'-]/g,' ').replace(/\s+/g,' ').trim().replace(/^(to|the|a|an|le|la|les|l'|un|une|des)\s+/,'');
 const lev=(a,b)=>{const m=a.length,n=b.length,d=Array.from({length:m+1},(_,i)=>[i]);for(let j=1;j<=n;j++)d[0][j]=j;for(let i=1;i<=m;i++)for(let j=1;j<=n;j++){d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1))}return d[m][n]};
 const isMatch=(inp,acc)=>acc.some(a=>a&&(inp===a||(a.length>3&&lev(inp,a)<=(a.length>7?2:1))));
 const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&','<':'<','>':'>','"':'"'}[c]));
 const chapOf=w=>(w.chapter&&w.chapter.trim())||'Sans chapitre';
-const isAdmin=()=>!!localStorage.getItem(tokenKey);
+const isAdmin=()=>!!sessionStorage.getItem(tokenKey);
 
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),2400)}
 function speak(text,lang){if(!('speechSynthesis'in window))return toast('Audio non dispo');speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=lang;speechSynthesis.speak(u)}
 
 async function api(url,opt={}){
   const h={'Content-Type':'application/json'};
-  if(localStorage.getItem(tokenKey))h.Authorization='Bearer '+localStorage.getItem(tokenKey);
+  if(sessionStorage.getItem(tokenKey))h.Authorization='Bearer '+sessionStorage.getItem(tokenKey);
   const r=await fetch(API+url,{...opt,headers:h});
   if(!r.ok)throw Error((await r.json().catch(()=>({}))).error||'Erreur');
   return r.json();
@@ -318,7 +321,7 @@ $('#deleteChapterBtn').onclick=async()=>{
     toast(err.message);
   }
 };
-  
+
 function renderChapterPage(){
   const list=wordsOf(openChap);
   $('#chapTitle').textContent=openChap===ALL?'Tous les chapitres':openChap;
@@ -440,7 +443,7 @@ $('#loginForm').onsubmit=async e=>{
   e.preventDefault();
   try{
     const r=await api('/login',{method:'POST',body:JSON.stringify({password:new FormData(e.target).get('password')})});
-    localStorage.setItem(tokenKey,r.token);
+    sessionStorage.setItem(tokenKey,r.token);
     $('#modal').hidden=true;
     document.body.classList.add('is-admin');
     load();
