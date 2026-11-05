@@ -7,6 +7,12 @@ const { Pool } = require('pg');
 const PORT = process.env.PORT || 3000;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin';
 const INDEX = path.join(__dirname, 'index.html');
+const PUBLIC_FILES = {
+  '/manifest.webmanifest': { file: path.join(__dirname, 'manifest.webmanifest'), type: 'application/manifest+json; charset=utf-8' },
+  '/icons/icon-192.png': { file: path.join(__dirname, 'icons', 'icon-192.png'), type: 'image/png' },
+  '/icons/icon-512.png': { file: path.join(__dirname, 'icons', 'icon-512.png'), type: 'image/png' }
+};
+const SERVICE_WORKER = path.join(__dirname, 'sw.js');
 const sessions = new Set();
 const reportCooldown = new Map();
 const visitCooldown = new Map();
@@ -802,6 +808,22 @@ const server = http.createServer(async (req, res) => {
 
     if (p === '/api/config' && req.method === 'GET') return send(res, 200, { adminPasswordConfigured: true });
     if (p === '/api/health') return send(res, 200, { ok: true });
+
+    if (p === '/sw.js' && req.method === 'GET') {
+      return send(res, 200, fs.readFileSync(SERVICE_WORKER), {
+        'Content-Type': 'application/javascript; charset=utf-8',
+        'Service-Worker-Allowed': '/',
+        'Cache-Control': 'no-cache'
+      });
+    }
+
+    if (PUBLIC_FILES[p] && req.method === 'GET') {
+      const asset = PUBLIC_FILES[p];
+      return send(res, 200, fs.readFileSync(asset.file), {
+        'Content-Type': asset.type,
+        'Cache-Control': p === '/manifest.webmanifest' ? 'no-cache' : 'public, max-age=31536000, immutable'
+      });
+    }
 
     if (p === '/' || p === '/index.html') {
       return send(res, 200, fs.readFileSync(INDEX), { 'Content-Type': 'text/html; charset=utf-8' });

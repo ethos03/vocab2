@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101713">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon-192.png" type="image/png">
 <title>Roue des mots</title>
 <style>
 :root{--bg:#f4f1ea;--panel:#fffdf8;--ink:#1f2522;--muted:#68716b;--line:#dcd8ce;--accent:#e7833f;--accent2:#1d6b5d;--soft:#eef4f0;--shadow:0 18px 50px #28372c18}
@@ -114,6 +117,9 @@ main{max-width:1300px;margin:auto;padding:18px 28px 60px}
 .modal .card{width:min(410px,100%);padding:24px}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:99px;display:none;z-index:20}
 .toast.show{display:block}
+.offline-badge{display:none;position:fixed;right:14px;bottom:14px;z-index:19;padding:9px 13px;border:1px solid #517d5d;border-radius:999px;background:#101713;color:#b9f28d;font-size:12px;font-weight:800;box-shadow:0 6px 22px #0004}
+body.offline .offline-badge{display:block}
+button:disabled{opacity:.48;cursor:not-allowed}
 
 .flagbtn{background:transparent;color:var(--muted);font-size:15px;padding:2px 5px}
 .flagbtn:hover{color:var(--accent)}
@@ -123,6 +129,7 @@ main{max-width:1300px;margin:auto;padding:18px 28px 60px}
 </style>
 </head>
 <body>
+<div id="offlineBadge" class="offline-badge" role="status" aria-live="polite">Hors ligne — actions admin : connexion requise</div>
 
 <header>
   <div class="brand">
@@ -153,16 +160,16 @@ main{max-width:1300px;margin:auto;padding:18px 28px 60px}
     <div id="chapList">
       <div class="listhead"><h2>Mes chapitres</h2><span class="small" id="totalCount"></span></div>
       <div class="admin-only" style="margin:0 0 14px">
-        <button class="secondary" id="newChapterToggle" type="button">＋ Nouveau chapitre</button>
+        <button class="secondary admin-action" id="newChapterToggle" type="button">＋ Nouveau chapitre</button>
         <span class="small" id="chapterStatus" role="status" style="margin-left:8px"></span>
-        <form id="chapterForm" class="card" hidden style="padding:15px;margin-top:10px;max-width:480px">
+        <form id="chapterForm" class="card admin-form" hidden style="padding:15px;margin-top:10px;max-width:480px">
           <div class="field"><label for="newChapterName">Nom / numéro du chapitre *</label>
             <input id="newChapterName" name="name" required maxlength="80" autocomplete="off" placeholder="Ex : Unit 2">
           </div>
           <button class="primary" type="submit">Créer le chapitre</button>
         </form>
         <div style="margin-top:12px">
-          <button class="secondary" id="spellcheckBtn" type="button">✦ Vérifier l’orthographe (gratuit)</button>
+          <button class="secondary admin-action" id="spellcheckBtn" type="button">✦ Vérifier l’orthographe (gratuit)</button>
           <span class="small" id="spellcheckStatus" role="status" style="margin-left:8px"></span>
         </div>
       </div>
@@ -170,7 +177,7 @@ main{max-width:1300px;margin:auto;padding:18px 28px 60px}
 
       <div class="admin-only card" style="padding:22px;margin-top:24px;max-width:480px">
         <p class="eyebrow">Ajouter un mot</p>
-        <form id="wordForm">
+        <form id="wordForm" class="admin-form">
           <div class="field"><label>Chapitre *</label>
             <input name="chapter" id="chapInput" list="chapNames" required placeholder="Ex : Unit 1">
             <datalist id="chapNames"></datalist>
@@ -189,8 +196,8 @@ main{max-width:1300px;margin:auto;padding:18px 28px 60px}
       <div class="backbar">
         <button class="secondary" id="backBtn">← Chapitres</button>
         <h2 id="chapTitle"></h2>
-        <button class="secondary admin-only" id="addWordToChapter" type="button">＋ Ajouter un mot</button>
-        <button class="secondary admin-only" id="deleteChapterBtn" type="button">Supprimer le chapitre</button>
+        <button class="secondary admin-only admin-action" id="addWordToChapter" type="button">＋ Ajouter un mot</button>
+        <button class="secondary admin-only admin-action" id="deleteChapterBtn" type="button">Supprimer le chapitre</button>
         <select id="mode" style="padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink)">
           <option value="mixed">Mixte</option>
           <option value="en-fr">Anglais → Français</option>
@@ -282,7 +289,7 @@ main{max-width:1300px;margin:auto;padding:18px 28px 60px}
         </div>
       </div>
       <div class="admin-only">
-        <form id="evalForm" class="formgrid">
+        <form id="evalForm" class="admin-form formgrid">
           <div class="field"><label>Nom *</label><input name="name" required placeholder="Contrôle chapitre 2"></div>
           <div class="field"><label>Date *</label><input name="date" type="date" required></div>
           <div class="field" style="grid-column:1/-1"><label>Mots présents (séparés par des virgules)</label><textarea name="words" required></textarea></div>
@@ -306,7 +313,7 @@ main{max-width:1300px;margin:auto;padding:18px 28px 60px}
 <div class="modal" id="modal" hidden>
   <div class="card">
     <div class="listhead"><h2>Connexion admin</h2><button class="iconbtn" id="closeModal">×</button></div>
-    <form id="loginForm">
+    <form id="loginForm" class="admin-form">
       <div class="field"><label>Mot de passe</label><input type="password" name="password" required></div>
       <button class="primary">Se connecter</button>
       <p class="result" id="loginMsg"></p>
@@ -316,7 +323,7 @@ main{max-width:1300px;margin:auto;padding:18px 28px 60px}
 <div class="modal" id="editModal" hidden>
   <div class="card" style="width:min(520px,100%);max-height:90vh;overflow:auto">
     <div class="listhead"><h2>Modifier un mot</h2><button class="iconbtn" id="closeEdit" type="button">×</button></div>
-    <form id="editForm">
+    <form id="editForm" class="admin-form">
       <div class="field"><label>Chapitre *</label><input name="chapter" list="chapNames" required></div>
       <div class="field"><label>Anglais *</label><input name="english" required></div>
       <div class="field"><label>Français *</label><input name="translation" required></div>
@@ -418,12 +425,16 @@ function quizChoices(word,pool,direction){
 }
 
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),2400)}
+function updateOfflineState(){const offline=!navigator.onLine;document.body.classList.toggle('offline',offline);document.querySelectorAll('.admin-action,.admin-only button').forEach(el=>el.disabled=offline);document.querySelectorAll('.admin-form button[type=submit]').forEach(el=>el.disabled=offline);if(offline)document.querySelectorAll('.admin-form input,.admin-form textarea').forEach(el=>el.disabled=true);else document.querySelectorAll('.admin-form input,.admin-form textarea').forEach(el=>el.disabled=false)}
+window.addEventListener('online',()=>{updateOfflineState();toast('Connexion rétablie')});
+window.addEventListener('offline',()=>{updateOfflineState();toast('Hors ligne — connexion requise pour les actions admin')});
 function speak(text,lang){if(!('speechSynthesis'in window))return toast('Audio non dispo');speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=lang;speechSynthesis.speak(u)}
 
 async function api(url,opt={}){
+  if((opt.method||'GET').toUpperCase()!=='GET'&&!navigator.onLine){toast('Connexion requise pour cette action');throw Error('Connexion requise');}
   const h={'Content-Type':'application/json'};
   if(sessionStorage.getItem(tokenKey))h.Authorization='Bearer '+sessionStorage.getItem(tokenKey);
-  const r=await fetch(API+url,{...opt,headers:h});
+  let r;try{r=await fetch(API+url,{...opt,headers:h})}catch(err){if(!navigator.onLine){toast('Connexion requise pour cette action');throw Error('Connexion requise')}throw err;}
   if(!r.ok)throw Error((await r.json().catch(()=>({}))).error||'Erreur');
   return r.json();
 }
@@ -516,7 +527,7 @@ function renderChapterPage(){
   $('#count').textContent=list.length+' affiché'+(list.length>1?'s':'')+' / '+all.length+' · appris '+learned+' · maîtrisés '+mastered;
   $('#deleteChapterBtn').style.display=isAdmin()&&openChap!==ALL?'inline-flex':'none';
   $('#addWordToChapter').style.display=isAdmin()&&openChap!==ALL?'inline-flex':'none';
-  $('#wordlist').innerHTML=list.length?list.map(w=>`<article class="worditem"><div class="wline"><div><div class="en">${esc(w.english)}</div><div class="fr">→ ${esc(w.translation)}</div></div><span><button class="starbtn ${favorites.has(String(w.id))?'on':''}" data-favorite="${esc(w.id)}" aria-label="${favorites.has(String(w.id))?'Retirer des favoris':'Ajouter aux favoris'}" title="Favori">${favorites.has(String(w.id))?'⭐':'☆'}</button><button class="speak" data-speak="${esc(w.id)}">🔊</button><button class="flagbtn" data-flag="${esc(w.id)}" title="Signaler">🚩</button></span></div><div class="meta">${w.synonym?'synonyme · '+esc(w.synonym)+' · ':''}${w.antonym?'contraire · '+esc(w.antonym):''}${openChap===ALL?'<br>📁 '+esc(chapOf(w)):''}${isAdmin()?`<br><button class="admin-inline secondary" data-edit="${esc(w.id)}" style="margin-top:8px;padding:5px 8px">✏️ Modifier</button> <button class="admin-inline secondary" data-delete="${esc(w.id)}" style="margin-top:8px;padding:5px 8px">Supprimer</button>`:''}</div></article>`).join(''):(all.length?'<div class="empty">Aucun mot ne correspond à cette recherche.</div>':'<div class="empty">Ce chapitre est vide.</div>');
+  $('#wordlist').innerHTML=list.length?list.map(w=>`<article class="worditem"><div class="wline"><div><div class="en">${esc(w.english)}</div><div class="fr">→ ${esc(w.translation)}</div></div><span><button class="starbtn ${favorites.has(String(w.id))?'on':''}" data-favorite="${esc(w.id)}" aria-label="${favorites.has(String(w.id))?'Retirer des favoris':'Ajouter aux favoris'}" title="Favori">${favorites.has(String(w.id))?'⭐':'☆'}</button><button class="speak" data-speak="${esc(w.id)}">🔊</button><button class="flagbtn" data-flag="${esc(w.id)}" title="Signaler">🚩</button></span></div><div class="meta">${w.synonym?'synonyme · '+esc(w.synonym)+' · ':''}${w.antonym?'contraire · '+esc(w.antonym):''}${openChap===ALL?'<br>📁 '+esc(chapOf(w)):''}${isAdmin()?`<br><button class="admin-inline secondary admin-action" data-edit="${esc(w.id)}" style="margin-top:8px;padding:5px 8px">✏️ Modifier</button> <button class="admin-inline secondary admin-action" data-delete="${esc(w.id)}" style="margin-top:8px;padding:5px 8px">Supprimer</button>`:''}</div></article>`).join(''):(all.length?'<div class="empty">Aucun mot ne correspond à cette recherche.</div>':'<div class="empty">Ce chapitre est vide.</div>');
   $$('[data-favorite]').forEach(b=>b.onclick=()=>{const id=String(b.dataset.favorite);favorites.has(id)?favorites.delete(id):favorites.add(id);localStorage.setItem(favoriteKey,JSON.stringify([...favorites]));renderChapterPage()});
   $$('[data-speak]').forEach(b=>b.onclick=()=>speak(words.find(w=>String(w.id)===b.dataset.speak).english,'en-US'));
   $$('[data-flag]').forEach(b=>b.onclick=()=>openReport(b.dataset.flag));
@@ -526,6 +537,7 @@ function renderChapterPage(){
   });
   $$('#wordFilters [data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter===activeFilter));
   drawWheel(list.length);
+  updateOfflineState();
 }
 
 /* ---------- Roue (couleurs seulement, lisible même à 75+ mots) ---------- */
@@ -786,6 +798,7 @@ $('#themeBtn').onclick=()=>{
 if(localStorage.getItem('roue-theme')==='dark')document.body.classList.add('dark');
 
 $('#adminBtn').onclick=()=>{
+  if(!navigator.onLine){toast('Connexion requise pour les actions admin');return}
   if(!isAdmin()){$('#modal').hidden=false;return}
   document.body.classList.add('is-admin');
   toast('Mode admin activé');
@@ -877,10 +890,11 @@ function renderStats(){
 }
 
 if(isAdmin())document.body.classList.add('is-admin');
+updateOfflineState();
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').then(()=>navigator.serviceWorker.ready).then(()=>{if(navigator.onLine)load()}).catch(()=>{}));
 load();
 })();
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"8607d2a720d14b038279025b2b5a82e5","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"8607d2a720d14b038279025b2b5a82e5","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
